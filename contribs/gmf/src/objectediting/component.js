@@ -28,7 +28,8 @@ import olStyleFill from 'ol/style/Fill.js';
 import olStyleStroke from 'ol/style/Stroke.js';
 import olStyleStyle from 'ol/style/Style.js';
 
-import jsts from 'jsts';
+// @ts-ignore: import don't work's with Typescript
+import {OL3Parser} from 'jsts/io.js';
 
 
 /**
@@ -311,7 +312,7 @@ function Controller($scope, $timeout, gettextCatalog,
    * @type {!jsts.io.OL3Parser}
    * @private
    */
-  this.jstsOL3Parser_ = new jsts.io.OL3Parser();
+  this.jstsOL3Parser_ = new OL3Parser();
 
   /**
    * The state of the feature determines whether the next 'save' request
