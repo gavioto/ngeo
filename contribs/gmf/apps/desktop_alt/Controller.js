@@ -27,6 +27,18 @@ if (!window.requestAnimationFrame) {
 }
 
 
+// Hack to make the bootstrap type check working with polyfill.io
+const oldObjectToString = Object.prototype.toString;
+if (oldObjectToString.toString().indexOf('[native code]') < 0) {
+  Object.prototype.toString = () => {
+    if (this === window) {
+      return '[object Null]';
+    }
+    return oldObjectToString.call(this);
+  };
+}
+
+
 /**
  * @private
  */
