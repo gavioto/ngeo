@@ -1,7 +1,7 @@
 import angular from 'angular';
 import appURL from './url.js';
 import './editfeatureselector.css';
-import 'jquery-ui/ui/widgets/tooltip.js';
+import 'bootstrap/js/src/tooltip.js';
 import gmfAuthenticationModule from 'gmf/authentication/module.js';
 
 import gmfEditingEditFeatureSelectorComponent from 'gmf/editing/editFeatureSelectorComponent.js';
@@ -156,11 +156,12 @@ function MainController($scope, gmfThemes, gmfTreeManager, gmfUser,
     'mapTools', dummyToolActivate, false);
 
   // initialize tooltips
-  $('[data-toggle="tooltip"]').tooltip({
+  $('[data-toggle="tooltip"]').tooltip(/** @type {Bootstrap.TooltipOption} */({
     container: 'body',
-    trigger: 'hover'
-  });
-
+    trigger: 'hover',
+    // Avoid error in config type checking with IE11
+    sanitizeFn: (text) => text,
+  }));
 }
 
 

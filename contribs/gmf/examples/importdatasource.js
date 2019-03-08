@@ -2,7 +2,7 @@
 import angular from 'angular';
 import appURL from './url.js';
 import './importdatasource.css';
-import 'jquery-ui/ui/widgets/tooltip.js';
+import 'bootstrap/js/src/tooltip.js';
 import gmfDatasourceManager from 'gmf/datasource/Manager.js';
 
 import gmfImportImportdatasourceComponent from 'gmf/import/importdatasourceComponent.js';
@@ -134,11 +134,12 @@ class MainController {
     this.queryActive = true;
 
     // initialize tooltips
-    $('[data-toggle="tooltip"]').tooltip({
+    $('[data-toggle="tooltip"]').tooltip(/** @type {Bootstrap.TooltipOption} */({
       container: 'body',
-      trigger: 'hover'
-    });
-
+      trigger: 'hover',
+      // Avoid error in config type checking with IE11
+      sanitizeFn: (text) => text,
+    }));
   }
 }
 

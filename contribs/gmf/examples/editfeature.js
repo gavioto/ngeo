@@ -1,7 +1,7 @@
 import angular from 'angular';
 import appURL from './url.js';
 import './editfeature.css';
-import 'jquery-ui/ui/widgets/tooltip.js';
+import 'bootstrap/js/src/tooltip.js';
 import EPSG21781 from '@geoblocks/proj/src/EPSG_21781.js';
 
 import gmfAuthenticationModule from 'gmf/authentication/module.js';
@@ -125,10 +125,12 @@ function MainController($scope, gmfEditFeature, gmfUser) {
   this.map.on('singleclick', this.handleMapSingleClick_.bind(this));
 
   // initialize tooltips
-  $('[data-toggle="tooltip"]').tooltip({
+  $('[data-toggle="tooltip"]').tooltip(/** @type {Bootstrap.TooltipOption} */({
     container: 'body',
-    trigger: 'hover'
-  });
+    trigger: 'hover',
+    // Avoid error in config type checking with IE11
+    sanitizeFn: (text) => text,
+  }));
 }
 
 

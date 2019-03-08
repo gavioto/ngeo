@@ -100,7 +100,6 @@ export class AbstractDesktopController extends AbstractAPIController {
       container: 'body',
       trigger: 'hover',
       selector: '[data-toggle="tooltip"]',
-
       // Avoid error in config type checking with IE11
       sanitizeFn: $injector.get('$sanitize')
     }));

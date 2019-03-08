@@ -1,5 +1,5 @@
 import './notification.css';
-import 'jquery-ui/ui/widgets/tooltip.js';
+import 'bootstrap/js/src/tooltip.js';
 import angular from 'angular';
 import {MessageType} from 'ngeo/message/Message.js';
 
@@ -33,11 +33,12 @@ function MainController(ngeoNotification) {
   this.i_ = 1;
 
   // initialize tooltips
-  $('[data-toggle="tooltip"]').tooltip({
+  $('[data-toggle="tooltip"]').tooltip(/** @type {Bootstrap.TooltipOption} */ ({
     container: 'body',
-    trigger: 'hover'
-  });
-
+    trigger: 'hover',
+    // Avoid error in config type checking with IE11
+    sanitizeFn: (text) => text,
+  }));
 }
 
 

@@ -1,6 +1,6 @@
 import angular from 'angular';
 import './drawfeature.css';
-import 'jquery-ui/ui/widgets/tooltip.js';
+import 'bootstrap/js/src/tooltip.js';
 import gmfMapComponent from 'gmf/map/component.js';
 
 import gmfDrawingModule from 'gmf/drawing/module.js';
@@ -118,10 +118,12 @@ function MainController($scope, ngeoFeatureHelper, ngeoFeatures,
   );
 
   // initialize tooltips
-  $('[data-toggle="tooltip"]').tooltip({
+  $('[data-toggle="tooltip"]').tooltip(/** @type {Bootstrap.TooltipOption} */({
     container: 'body',
-    trigger: 'hover'
-  });
+    trigger: 'hover',
+    // Avoid error in config type checking with IE11
+    sanitizeFn: (text) => text,
+  }));
 }
 
 
