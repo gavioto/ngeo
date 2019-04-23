@@ -37,7 +37,8 @@ export function getBackgroundLayers() {
   return getThemesPromise().then((themes) => {
     const promises = [];
     for (const config of themes.background_layers) {
-      if (config.type === 'WMTS') {
+      const layerConfig = /** @type {import('gmf/themes.js').GmfLayer} */(config);
+      if (layerConfig.type === 'WMTS') {
         const layerWMTS = /** @type {import('gmf/themes.js').GmfLayerWMTS} */(config);
         promises.push(
           createWMTSLayer(layerWMTS).then((layer) => {
@@ -46,7 +47,7 @@ export function getBackgroundLayers() {
             return layer;
           })
         );
-      } else if (config.type === 'WMS') {
+      } else if (layerConfig.type === 'WMS') {
         const layerWMS = /** @type {import('gmf/themes.js').GmfLayerWMS} */(config);
         const ogcServer = themes.ogcServers[config.ogcServer];
         promises.push(

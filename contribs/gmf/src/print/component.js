@@ -1095,19 +1095,19 @@ class Controller {
     let datasourceObj, data, columns;
     const datasourceArr = [];
     const sources = this.ngeoQueryResult_.sources;
-    sources.forEach(function(source) {
+    sources.forEach((source) => {
       data = [];
       columns = [];
-      source.features.forEach(function(feature, i) {
+      source.features.forEach((feature, i) => {
         console.assert(feature);
         const properties = getFilteredFeatureValues(feature);
         if (i === 0) {
-          columns = Object.keys(properties).map(function tanslateColumns(prop) {
+          columns = Object.keys(properties).map((prop) => {
             return this.translate_(prop);
-          }, this);
+          });
         }
         data.push(Object.keys(properties).map(key => properties[key]));
-      }, this);
+      });
       if (columns.length) {
         datasourceObj =
           /** @type {DataSourcePrintReportObject} */({
@@ -1119,7 +1119,7 @@ class Controller {
           });
         datasourceArr.push(datasourceObj);
       }
-    }, this);
+    });
     return datasourceArr;
   }
 
