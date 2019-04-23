@@ -44,6 +44,9 @@ export default class extends olOverlay {
    */
   setMap(map) {
     const element = this.getElement();
+    if (!element) {
+      throw 'Missing element';
+    }
 
     const currentMap = this.getMap();
     if (currentMap) {

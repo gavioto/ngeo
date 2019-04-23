@@ -10,7 +10,7 @@ import olGeomPoint from 'ol/geom/Point.js';
 import olInteractionPointer from 'ol/interaction/Draw.js';
 import olLayerVector from 'ol/layer/Vector.js';
 import olSourceVector from 'ol/source/Vector.js';
-
+import VectorSource from 'ol/source/Vector.js';
 
 /**
  * @typedef {Object} Options
@@ -30,23 +30,23 @@ class DrawAzimut extends olInteractionPointer {
    */
   constructor(options) {
     super({
-      type: undefined
+      type: '',
     });
 
     this.shouldStopEvent = FALSE;
 
     /**
-     * @type {import("ol/pixel.js").Pixel}
+     * @type {?import("ol/pixel.js").Pixel}
      * @private
      */
     this.downPx_ = null;
 
     /**
      * Target source for drawn features.
-     * @type {import("ol/source/Vector.js").default}
+     * @type {?import("ol/source/Vector.js").default}
      * @private
      */
-    this.source_ = options.source !== undefined ? options.source : null;
+    this.source_ = options.source || null;
 
     /**
      * Tglls whether the drawing has started or not.
@@ -57,14 +57,14 @@ class DrawAzimut extends olInteractionPointer {
 
     /**
      * Sketch feature.
-     * @type {import("ol/Feature.js").default}
+     * @type {?import("ol/Feature.js").default}
      * @private
      */
     this.sketchFeature_ = null;
 
     /**
      * Sketch point.
-     * @type {import("ol/Feature.js").default}
+     * @type {?import("ol/Feature.js").default}
      * @private
      */
     this.sketchPoint_ = null;
@@ -172,13 +172,20 @@ class DrawAzimut extends olInteractionPointer {
    */
   modifyDrawing_(event) {
     const coordinate = event.coordinate;
-    const geometry = /** @type {import('ol/geom/GeometryCollection.js').default} */(
-      this.sketchFeature_.getGeometry()
-    );
+    if (!this.sketchFeature_) {
+      throw 'Missing sketchFeature';
+    }
+    const geometry = this.sketchFeature_.getGeometry();
+    if (!(geometry instanceof olGeomGeometryCollection)) {
+      throw 'Missing geometry';
+    }
     const geometries = geometry.getGeometriesArray();
     const line = geometries[0];
     if (line instanceof olGeomLineString) {
       const coordinates = line.getCoordinates();
+      if (!this.sketchPoint_) {
+        throw 'Missing sketchPoint';
+      }
       const sketchPointGeom = this.sketchPoint_.getGeometry();
       if (sketchPointGeom instanceof olGeomPoint) {
         sketchPointGeom.setCoordinates(coordinate);
@@ -202,13 +209,18 @@ class DrawAzimut extends olInteractionPointer {
    * @private
    */
   abortDrawing_() {
+    if (!this.sketchFeature_) {
+      throw 'Missing sketchFeature';
+    }
     this.started_ = false;
     const sketchFeature = this.sketchFeature_;
-    if (sketchFeature !== null) {
-      this.sketchFeature_ = null;
-      this.sketchPoint_ = null;
-      /** @type {olSourceVector} */(this.sketchLayer_.getSource()).clear(true);
+    this.sketchFeature_ = null;
+    this.sketchPoint_ = null;
+    const source = this.sketchLayer_.getSource();
+    if (!(source instanceof VectorSource)) {
+      throw 'Missing source';
     }
+    source.clear(true);
     return sketchFeature;
   }
 
@@ -221,6 +233,7 @@ class DrawAzimut extends olInteractionPointer {
     if (map === null || !active) {
       this.abortDrawing_();
     }
+    // @ts-ignore: OL issue
     this.sketchLayer_.setMap(active ? map : null);
   }
 
@@ -230,10 +243,15 @@ class DrawAzimut extends olInteractionPointer {
    */
   finishDrawing_() {
     const sketchFeature = this.abortDrawing_();
-    console.assert(sketchFeature !== null);
+    if (!sketchFeature) {
+      throw 'Missing sketchFeature';
+    }
 
     if (this.source_ !== null) {
       this.source_.addFeature(sketchFeature);
+    }
+    if (!this.sketchFeature_) {
+      throw 'Missing sketchFeature';
     }
 
     /** @type {import('ngeo/interaction/common.js').DrawEvent} */
@@ -263,6 +281,9 @@ class DrawAzimut extends olInteractionPointer {
    * @return {boolean} Stop drag sequence?
    */
   handleUpEvent(event) {
+    if (!this.downPx_) {
+      throw 'Missing downPx';
+    }
     const downPx = this.downPx_;
     const clickPx = event.pixel;
     const dx = downPx[0] - clickPx[0];

@@ -35,14 +35,15 @@ describe('gmf.authentication.Service', () => {
 
   it('emits READY after login status check', () => {
     const spy = jasmine.createSpy();
-    /** @type {import('gmf/authentication/Service.js').AuthenticationEvent} */
-    let event;
+    let event_ = null;
     olEvents.listenOnce(
       gmfAuthentication, 'ready', (evt) => {
-        event = /** @type {import('gmf/authentication/Service.js').AuthenticationEvent} */(evt);
+        event_ = /** @type {import('gmf/authentication/Service.js').AuthenticationEvent} */(evt);
         spy();
       }
     );
+    // @ts-ignore: Don't understand ...
+    const event = /** @type {import('gmf/authentication/Service.js').AuthenticationEvent} */(event_);
 
     $httpBackend.when('GET', isLoggedInUrl).respond({});
 
@@ -58,12 +59,14 @@ describe('gmf.authentication.Service', () => {
   it('logins successful', () => {
     const spy = jasmine.createSpy();
     /** @type {import('gmf/authentication/Service.js').AuthenticationEvent} */
-    let event;
+    let event_;
     olEvents.listenOnce(
       gmfAuthentication, 'login', (evt) => {
-        event = /** @type {import('gmf/authentication/Service.js').AuthenticationEvent} */(evt);
+        event_ = /** @type {import('gmf/authentication/Service.js').AuthenticationEvent} */(evt);
         spy();
       });
+    // @ts-ignore: Don't understand ...
+    const event = /** @type {import('gmf/authentication/Service.js').AuthenticationEvent} */(event_);
 
     $httpBackend.when('POST', loginUrl).respond({'username': 'user'});
 

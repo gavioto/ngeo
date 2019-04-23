@@ -82,19 +82,19 @@ export default class extends olInteractionPointer {
 
     /**
      * The feature currently modified.
-     * @type {import("ol/Feature.js").default}
+     * @type {?import("ol/Feature.js").default}
      * @private
      */
     this.feature_ = null;
 
     /**
-     * @type {import("ol/pixel.js").Pixel}
+     * @type {?import("ol/pixel.js").Pixel}
      * @private
      */
     this.coordinate_ = null;
 
     /**
-     * @type {import("ol/coordinate.js").Coordinate}
+     * @type {?import("ol/coordinate.js").Coordinate}
      * @private
      */
     this.centerCoordinate_ = null;
@@ -163,7 +163,9 @@ export default class extends olInteractionPointer {
    */
   addFeature_(feature) {
     const geometry = feature.getGeometry();
-    console.assert(geometry instanceof olGeomGeometry);
+    if (!geometry) {
+      throw 'Missing geometry';
+    }
 
     feature.set('angle', 0);
 
@@ -254,7 +256,7 @@ export default class extends olInteractionPointer {
         }
       });
       if (!found) {
-        feature = null;
+        feature = undefined;
       }
     }
 
@@ -300,8 +302,19 @@ export default class extends olInteractionPointer {
   handleDrag_(evt) {
     this.willModifyFeatures_(evt);
 
-    const geometry = /** @type {import("ol/geom/SimpleGeometry.js").default} */
-        (this.feature_.getGeometry());
+    if (!this.feature_) {
+      throw 'Missing feature';
+    }
+    if (!this.coordinate_) {
+      throw 'Missing coordinate';
+    }
+    if (!this.centerCoordinate_) {
+      throw 'Missing centerCoordinate';
+    }
+    const geometry = this.feature_.getGeometry();
+    if (!geometry) {
+      throw 'Missing geometry';
+    }
 
     const oldX = this.coordinate_[0];
     const oldY = this.coordinate_[1];
@@ -331,6 +344,9 @@ export default class extends olInteractionPointer {
    */
   handleUp_(evt) {
     if (this.modified_) {
+      if (!this.feature_) {
+        throw 'Missing feature';
+      }
       /** @type {RotateEvent} */
       const event = new ngeoCustomEvent('rotateend', {feature: this.feature_});
       this.dispatchEvent(event);

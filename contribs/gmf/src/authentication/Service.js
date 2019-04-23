@@ -186,6 +186,9 @@ export class AuthenticationService extends olEventsEventTarget {
    * @return {angular.IPromise} Promise.
    */
   logout() {
+    if (!this.noReloadRole_) {
+      throw 'Missing noReloadRole';
+    }
     const noReload = this.getRolesNames().indexOf(this.noReloadRole_) !== -1;
     const url = `${this.baseUrl_}/${RouteSuffix.LOGOUT}`;
     return this.$http_.get(url, {withCredentials: true}).then(() => {
