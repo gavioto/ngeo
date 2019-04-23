@@ -85,7 +85,7 @@ module.value('gmfObjecteditingTemplateUrl',
    * @return {string} Template URL.
    */
   ($element, $attrs) => {
-    const templateUrl = $attrs['gmfObjecteditingTemplateurl'];
+    const templateUrl = $attrs.gmfObjecteditingTemplateurl;
     return templateUrl !== undefined ? templateUrl :
       'gmf/objectediting';
   }
@@ -177,32 +177,32 @@ function Controller($scope, $timeout, gettextCatalog,
   /**
    * @type {boolean}
    */
-  this.active;
+  this.active = false;
 
   /**
-   * @type {import("ol/Feature.js").default}
+   * @type {?import("ol/Feature.js").default}
    */
-  this.feature;
+  this.feature = null;
 
   /**
-   * @type {string}
+   * @type {?string}
    */
-  this.geomType;
+  this.geomType = null;
 
   /**
-   * @type {number}
+   * @type {?number}
    */
-  this.layerNodeId;
+  this.layerNodeId = null;
 
   /**
-   * @type {import("ol/Map.js").default}
+   * @type {?import("ol/Map.js").default}
    */
-  this.map;
+  this.map = null;
 
   /**
-   * @type {import("ol/Collection.js").default.<import("ol/Feature.js").default>}
+   * @type {?import("ol/Collection.js").default.<import("ol/Feature.js").default>}
    */
-  this.sketchFeatures;
+  this.sketchFeatures = null;
 
 
   // == Injected properties ==
@@ -238,14 +238,14 @@ function Controller($scope, $timeout, gettextCatalog,
   this.gmfObjectEditingQuery_ = gmfObjectEditingQuery;
 
   /**
-   * @type {Array.<!import('gmf/objectediting/toolsComponent.js').ObjectEditingQueryableLayerInfo>}
+   * @type {Array<import('gmf/objectediting/toolsComponent.js').ObjectEditingQueryableLayerInfo>}
    */
-  this.queryableLayersInfo;
+  this.queryableLayersInfo = [];
 
   /**
-   * @type {import('gmf/objectediting/toolsComponent.js').ObjectEditingQueryableLayerInfo}
+   * @type {?import('gmf/objectediting/toolsComponent.js').ObjectEditingQueryableLayerInfo}
    */
-  this.selectedQueryableLayerInfo;
+  this.selectedQueryableLayerInfo = null;
 
   /**
    * Whether to show or hide the queryable list of layers. It is shown only
@@ -268,7 +268,7 @@ function Controller($scope, $timeout, gettextCatalog,
   /**
    * @type {boolean}
    */
-  this.featureHasGeom;
+  this.featureHasGeom = false;
 
   /**
    * @type {!import("ngeo/map/LayerHelper.js").LayerHelper}
@@ -315,7 +315,7 @@ function Controller($scope, $timeout, gettextCatalog,
   this.editableWMSLayer_ = null;
 
   /**
-   * @type {!jsts.io.OL3Parser}
+   * @type {jsts.io.OL3Parser}
    * @private
    */
   this.jstsOL3Parser_ = new OL3Parser();
@@ -323,19 +323,19 @@ function Controller($scope, $timeout, gettextCatalog,
   /**
    * The state of the feature determines whether the next 'save' request
    * should be an 'insert' or 'update' one.
-   * @type {string|undefined}
+   * @type {?string}
    * @private
    */
-  this.state_;
+  this.state_ = null;
 
   /**
-   * @type {!Array.<?import("ol/geom/Geometry.js").default>}
+   * @type {Array<?import("ol/geom/Geometry.js").default>}
    * @private
    */
   this.geometryChanges_ = [];
 
   /**
-   * @type {!StylesObject}
+   * @type {StylesObject}
    * @private
    */
   this.defaultStyles_ = {};
@@ -453,6 +453,9 @@ Controller.prototype.$onInit = function() {
     }
   );
 
+  if (!this.feature) {
+    throw 'Missing feature';
+  }
   const geometry = this.feature.getGeometry();
   this.state_ = geometry ? ObjecteditingState.UPDATE : ObjecteditingState.INSERT;
 
@@ -508,6 +511,12 @@ Controller.prototype.delete = function() {
   if (confirm(msg)) {
     this.dirty = false;
     this.pending = true;
+    if (!this.layerNodeId) {
+      throw 'Missing layerNodeId';
+    }
+    if (!this.feature) {
+      throw 'Missing feature';
+    }
 
     this.gmfEditFeature_.deleteFeature(
       this.layerNodeId,
@@ -524,6 +533,12 @@ Controller.prototype.delete = function() {
  * Save the current modifications.
  */
 Controller.prototype.save = function() {
+  if (!this.feature) {
+    throw 'Missing feature';
+  }
+  if (!this.layerNodeId) {
+    throw 'Missing layerNodeId';
+  }
 
   this.pending = true;
 
@@ -562,6 +577,9 @@ Controller.prototype.save = function() {
  * Undo the latest modifications.
  */
 Controller.prototype.undo = function() {
+  if (!this.feature) {
+    throw 'Missing feature';
+  }
 
   if (this.geometryChanges_.length <= 1) {
     return;
@@ -570,8 +588,10 @@ Controller.prototype.undo = function() {
   this.skipGeometryChange_ = true;
 
   this.geometryChanges_.pop();
-  const clone = cloneGeometry(
-    this.geometryChanges_[this.geometryChanges_.length - 1]);
+  const clone = cloneGeometry(this.geometryChanges_[this.geometryChanges_.length - 1]);
+  if (!clone) {
+    throw 'Missing clone';
+  }
 
   this.feature.setGeometry(clone);
 
@@ -596,7 +616,10 @@ Controller.prototype.isStateInsert = function() {
  * @private
  */
 Controller.prototype.handleDeleteFeature_ = function(resp) {
-  this.feature.setGeometry(null);
+  if (!this.feature) {
+    throw 'Missing feature';
+  }
+  this.feature.setGeometry(undefined);
   this.resetGeometryChanges_();
   this.state_ = ObjecteditingState.INSERT;
   this.pending = false;
@@ -610,6 +633,10 @@ Controller.prototype.handleDeleteFeature_ = function(resp) {
  * @private
  */
 Controller.prototype.handleEditFeature_ = function(resp) {
+  if (!this.feature) {
+    throw 'Missing feature';
+  }
+
   // (1) Update the id
   const features = new olFormatGeoJSON().readFeatures(resp.data);
   if (features.length) {
@@ -648,6 +675,9 @@ Controller.prototype.initializeInteractions_ = function() {
  */
 Controller.prototype.registerInteractions_ = function() {
   this.interactions_.forEach((interaction) => {
+    if (!this.map) {
+      throw 'Missing map';
+    }
     this.map.addInteraction(interaction);
   });
 };
@@ -659,6 +689,9 @@ Controller.prototype.registerInteractions_ = function() {
  */
 Controller.prototype.unregisterInteractions_ = function() {
   this.interactions_.forEach((interaction) => {
+    if (!this.map) {
+      throw 'Missing map';
+    }
     this.map.removeInteraction(interaction);
   });
 };
@@ -670,6 +703,12 @@ Controller.prototype.unregisterInteractions_ = function() {
  * @private
  */
 Controller.prototype.toggle_ = function(active) {
+  if (!this.feature) {
+    throw 'Missing feature';
+  }
+  if (!this.sketchFeatures) {
+    throw 'Missing sketchFeatures';
+  }
 
   const keys = this.listenerKeys_;
   const uid = `${NAMESPACE}-${olUtilGetUid(this)}`;
@@ -750,8 +789,13 @@ Controller.prototype.toggle_ = function(active) {
  * @private
  */
 Controller.prototype.undoAllChanges_ = function() {
-  const clone = cloneGeometry(
-    this.geometryChanges_[0]);
+  if (!this.feature) {
+    throw 'Missing feature';
+  }
+  const clone = cloneGeometry(this.geometryChanges_[0]);
+  if (!clone) {
+    throw 'Missing clone';
+  }
   this.feature.setGeometry(clone);
 
   this.resetGeometryChanges_();
@@ -771,6 +815,9 @@ Controller.prototype.resetGeometryChanges_ = function() {
     this.geometryChanges_.length = 0;
   }
   if (this.geometryChanges_.length === 0) {
+    if (!this.feature) {
+      throw 'Missing feature';
+    }
     const geometry = this.feature.getGeometry();
     const clone = cloneGeometry(geometry);
     this.geometryChanges_.push(clone);
@@ -789,10 +836,17 @@ Controller.prototype.resetGeometryChanges_ = function() {
  * @private
  */
 Controller.prototype.handleModifyInteractionModifyEnd_ = function(evt) {
+  if (!this.feature) {
+    throw 'Missing feature';
+  }
   let geometry = this.feature.getGeometry();
+  if (!geometry) {
+    throw 'Missing geometry';
+  }
 
   if (geometry.getType() === 'MultiPolygon') {
     const jstsGeom = this.jstsOL3Parser_.read(geometry);
+    // @ts-ignore: jsts issue?
     const jstsBuffered = jstsGeom.buffer(0, undefined, undefined);
     geometry = toMulti(this.jstsOL3Parser_.write(jstsBuffered));
     this.skipGeometryChange_ = true;
@@ -910,6 +964,9 @@ Controller.prototype.initializeStyles_ = function(
  * @private
  */
 Controller.prototype.setFeatureStyle_ = function() {
+  if (!this.feature) {
+    throw 'Missing feature';
+  }
   const geometry = this.feature.getGeometry();
   if (geometry) {
     const geomType = geometry.getType();
@@ -1018,6 +1075,12 @@ Controller.prototype.handleWindowBeforeUnload_ = function(e) {
  */
 Controller.prototype.handleSketchFeaturesAdd_ = function(evt) {
   if (evt instanceof CollectionEvent) {
+    if (!this.feature) {
+      throw 'Missing feature';
+    }
+    if (!this.sketchFeatures) {
+      throw 'Missing sketchFeatures';
+    }
     const sketchFeature = evt.element;
     const sketchGeom = sketchFeature.getGeometry();
 
@@ -1063,6 +1126,9 @@ Controller.prototype.handleSketchFeaturesAdd_ = function(evt) {
  * @private
  */
 Controller.prototype.handleFeatureGeometryChange_ = function() {
+  if (!this.feature) {
+    throw 'Missing feature';
+  }
   const geom = this.feature.getGeometry();
   this.timeout_(() => {
     this.featureHasGeom = !isEmpty(geom);

@@ -36,7 +36,7 @@ module.value('gmfMapMousepositionTemplateUrl',
    * @return {string} The template url.
    */
   ($attrs) => {
-    const templateUrl = $attrs['gmfMapMousepositionTemplateUrl'];
+    const templateUrl = $attrs.gmfMapMousepositionTemplateUrl;
     return templateUrl !== undefined ? templateUrl :
       'gmf/map/mousepositionComponent';
   });
@@ -98,19 +98,19 @@ module.component('gmfMouseposition', mapMousepositionComponent);
  */
 function Controller($element, $filter, $scope, gettextCatalog) {
   /**
-   * @type {import("ol/Map.js").default}
+   * @type {?import("ol/Map.js").default}
    */
-  this.map;
+  this.map = null;
 
   /**
-   * @type {Array.<!MousePositionProjection>}
+   * @type {Array<MousePositionProjection>}
    */
-  this.projections;
+  this.projections = [];
 
   /**
-   * @type {!MousePositionProjection}
+   * @type {?MousePositionProjection}
    */
-  this.projection;
+  this.projection = null;
 
   /**
    * @type {angular.IScope}
@@ -162,14 +162,24 @@ Controller.prototype.$onInit = function() {
  * @private
  */
 Controller.prototype.initOlControl_ = function() {
+  if (!this.map) {
+    throw 'Missing map';
+  }
   if (this.control_ !== null) {
     this.map.removeControl(this.control_);
   }
 
   // function that apply the filter.
   const formatFn = (coordinates) => {
+    if (!this.projection) {
+      throw 'Missing projection';
+    }
     const filterAndArgs = this.projection.filter.split(':');
-    const filter = this.$filter_(filterAndArgs.shift());
+    const shiftedFilterAndArgs = filterAndArgs.shift();
+    if (!shiftedFilterAndArgs) {
+      throw 'Missing shiftedFilterAndArgs';
+    }
+    const filter = this.$filter_(shiftedFilterAndArgs);
     console.assert(typeof filter == 'function');
     const args = filterAndArgs;
     args.unshift(coordinates);
@@ -194,6 +204,9 @@ Controller.prototype.initOlControl_ = function() {
  * @param {MousePositionProjection} projection The new projection to use.
  */
 Controller.prototype.setProjection = function(projection) {
+  if (!this.control_) {
+    throw 'Missing control';
+  }
   this.control_.setProjection(projection.code);
   this.projection = projection;
 };

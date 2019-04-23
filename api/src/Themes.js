@@ -18,6 +18,9 @@ let themesPromise;
  */
 function getThemesPromise() {
   if (!themesPromise) {
+    if (!constants.themesUrl) {
+      throw 'Missing constants.themesUrl';
+    }
     themesPromise = fetch(constants.themesUrl).then(response => response.json());
   }
   return themesPromise;
@@ -97,14 +100,13 @@ export function getOverlayDefs() {
 /**
  * @param {Object} config Config
  * @param {import('gmf/themes.js').GmfOgcServers} ogcServers OGC servers
- * @param {import('gmf/themes.js').GmfOgcServer} [opt_ogcServer]  OGC server
+ * @param {import('gmf/themes.js').GmfOgcServer} [opt_ogcServer] OGC server
  * @returns {void}
  * @hidden
  */
 export function writeOverlayDefs(config, ogcServers, opt_ogcServer) {
   const group = /** @type {import('gmf/themes.js').GmfGroup} */(config);
-  const ogcServer = opt_ogcServer ? opt_ogcServer :
-    group.ogcServer ? ogcServers[group.ogcServer] : undefined;
+  const ogcServer = opt_ogcServer ? opt_ogcServer : ogcServers[group.ogcServer];
   if (group.children) {
     for (const childConfig of group.children) {
       writeOverlayDefs(childConfig, ogcServers, ogcServer);
@@ -161,15 +163,17 @@ export function getOverlayLayers(layerNames) {
  * @hidden
  */
 export function createWMSLayer(config, ogcServer) {
+  const source = new ImageWMS({
+    url: ogcServer.url,
+    projection: undefined, // should be removed in next OL version
+    params: {
+      'LAYERS': config.layers
+    },
+    serverType: ogcServer.type
+  });
+  // @ts-ignore: OL issue
   const layer = new ImageLayer({
-    source: new ImageWMS({
-      url: ogcServer.url,
-      projection: undefined, // should be removed in next OL version
-      params: {
-        'LAYERS': config.layers
-      },
-      serverType: ogcServer.type
-    })
+    source
   });
   layer.set('title', config.name);
   return Promise.resolve(layer);
@@ -187,6 +191,9 @@ export function createWMTSLayer(config) {
       layer: config.layer,
       matrixSet: config.matrixSet
     });
+    if (!options) {
+      throw 'Missing options';
+    }
     const source = new WMTS(options);
     source.updateDimensions(config.dimensions);
     const layer = new TileLayer({

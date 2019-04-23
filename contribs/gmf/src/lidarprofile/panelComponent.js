@@ -132,15 +132,15 @@ class Controller {
     this.active = false;
 
     /**
-     * @type {import("ol/Map.js").default}
+     * @type {?import("ol/Map.js").default}
      */
     this.map = null;
 
     /**
      * The Openlayers LineString geometry of the profle
-     * @type {import("ol/geom/LineString.js").default}
+     * @type {?import("ol/geom/LineString.js").default}
      */
-    this.line;
+    this.line = null;
 
     /**
      * State of the measure tool
@@ -188,6 +188,9 @@ class Controller {
    * @private
    */
   $onInit() {
+    if (!this.map) {
+      throw 'Missing map';
+    }
     this.profile.init(this.profileConfig_, this.map);
   }
 
@@ -239,6 +242,7 @@ class Controller {
    */
   clearAll() {
     this.line = null;
+    // @ts-ignore: OL issue
     this.profile.setLine(null);
     this.profile.cartoHighlight.setPosition(undefined);
     this.clearMeasure();

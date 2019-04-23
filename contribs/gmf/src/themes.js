@@ -78,12 +78,12 @@
  * extends GmfBaseNode
  * @typedef {Object} GmfLayer
  * @property {number} id (GmfBaseNode)
- * @property {!GmfMetaData} metadata (GmfBaseNode)
+ * @property {GmfMetaData} metadata (GmfBaseNode)
  * @property {string} name (GmfBaseNode)
- * @property {!import('ngeo/datasource/OGC.js').Dimensions} dimensions The dimensions managed by the layer,
+ * @property {import('ngeo/datasource/OGC.js').Dimensions} dimensions The dimensions managed by the layer,
  *      if the value is null we will take the dimension from the application.
  *      Present only on layer in a mixed group.
- * @property {!import('ngeo/datasource/OGC.js').DimensionsFiltersConfig} dimensionsFilters The dimensions
+ * @property {import('ngeo/datasource/OGC.js').DimensionsFiltersConfig} dimensionsFilters The dimensions
  *      applied by filters on the layer configuration, if the value is null we will take the dimension from
  *      the application.
  * @property {boolean} [editable]
@@ -97,14 +97,14 @@
  * extends GmfLayer
  * @typedef {Object} GmfLayerWMS
  * @property {number} id (GmfBaseNode)
- * @property {!GmfMetaData} metadata (GmfBaseNode)
+ * @property {GmfMetaData} metadata (GmfBaseNode)
  * @property {string} name (GmfBaseNode)
- * @property {!import('ngeo/datasource/OGC.js').Dimensions} dimensions (GmfLayer)
- * @property {!import('ngeo/datasource/OGC.js').DimensionsFiltersConfig} dimensionsFilters (GmfLayer)
+ * @property {import('ngeo/datasource/OGC.js').Dimensions} dimensions (GmfLayer)
+ * @property {import('ngeo/datasource/OGC.js').DimensionsFiltersConfig} dimensionsFilters (GmfLayer)
  * @property {boolean} [editable] (GmfLayer)
  * @property {string} [style] (GmfLayer)
  * @property {string} type (GmfLayer)
- * @property {!Array.<!GmfLayerChildLayer>} childLayers
+ * @property {Array<GmfLayerChildLayer>} childLayers
  * @property {string} layers The comma separated list of WMS layers or groups.
  * @property {number} maxResolutionHint The max resolution where the layer is visible.
  * @property {number} minResolutionHint The min resolution where the layer is visible.
@@ -228,6 +228,7 @@
  * @property {string} [wmsLayers] A corresponding WMS layer for a WMTS layers. Used to query the WMTS layers
  *      and to print it. (See also printLayers and queryLayers metadata for more
  *      granularity). For WMTS Layers.
+ * @property {Object} [customOpenLayersOptions] The custom OpenLayers WMS layer options.
  */
 
 
